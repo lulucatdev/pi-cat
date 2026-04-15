@@ -1,0 +1,43 @@
+{
+  "name": "pi-vault-tec",
+  "version": "0.1.0",
+  "description": "Vault-Tec themed pi package for pi with a PI-BOY 3000 header, prompt injection, theme, and below-editor telemetry.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "vault-tec",
+    "theme",
+    "terminal",
+    "persona"
+  ],
+  "files": [
+    "extensions/**/*",
+    "themes/**/*",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "pack:check": "npm pack --dry-run"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions/vault-tec/index.ts"
+    ],
+    "themes": [
+      "./themes"
+    ]
+  }
+}
