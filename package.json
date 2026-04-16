@@ -1,7 +1,7 @@
 {
   "name": "pi-vault-tec",
-  "version": "0.1.0",
-  "description": "Vault-Tec themed pi package for pi with a PI-BOY 3000 header, prompt injection, theme, and below-editor telemetry.",
+  "version": "0.2.0",
+  "description": "Vault-Tec themed pi package for pi with a customizable header, prompt injection, theme, and below-editor telemetry.",
   "license": "MIT",
   "type": "module",
   "keywords": [

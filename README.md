@@ -1,10 +1,19 @@
 # pi-vault-tec
 
-`pi-vault-tec` is a pi package that applies a restrained Vault-Tec presentation layer to the interactive terminal. It combines a bundled phosphor-green theme, a light prompt layer, a text-only `PI-BOY 3000` header, and a telemetry block rendered below the editor.
+`pi-vault-tec` is a pi package that applies a restrained Vault-Tec presentation layer to the interactive terminal. It combines a bundled phosphor-green theme, a text-only header, and a telemetry block rendered below the editor.
 
 The package is inspired by [`kommander/oc-plugin-vault-tec`](https://github.com/kommander/oc-plugin-vault-tec), but it is implemented directly against pi's extension and theme APIs rather than as a line-for-line port.
 
 ## Preview
+
+A typical header looks like this:
+
+```text
+
+         PI-BOY 3000
+  VAULT-TEC TERMINAL INTERFACE
+
+```
 
 A typical lower telemetry block looks like this:
 
@@ -19,11 +28,11 @@ The exact spacing depends on terminal width, active model, and current session s
 ## Features
 
 - Bundled `vault-tec` theme with a phosphor-green terminal palette.
-- Append-only Vault-Tec prompt layer that preserves pi's base system prompt.
-- Text-only `PI-BOY 3000` header banner.
+- Minimal, text-only header banner with customizable title and subtitle.
 - Below-editor telemetry that shows model, provider, thinking level, context usage, cumulative token traffic, and workspace path.
 - Footer override that suppresses the default lower-footer clutter from pi and other extensions.
 - Session-scoped toggles plus disk-backed global or project settings.
+- Safe width handling: all lines are truncated to the terminal width to prevent crashes on narrow terminals.
 
 ## Installation
 
@@ -71,12 +80,29 @@ pi uninstall https://github.com/lulucatdev/pi-vault-tec
 After installation, the package can automatically:
 
 - switch pi to the bundled `vault-tec` theme;
-- append a light Vault-Tec terminal persona to the system prompt;
-- replace the default header with a text-only `PI-BOY 3000` banner;
+- replace the default header with a minimal, centered text banner;
 - show a telemetry panel below the editor with provider, model, thinking level, context usage, token counters, and workspace path;
 - suppress the default lower-footer clutter with a custom footer override.
 
-All of these features are individually toggleable.
+All of these features are individually toggleable. By default, the package does **not** modify the model's system prompt; it only affects the terminal UI.
+
+## Custom header text
+
+You can customize the header title and subtitle. Changes are automatically saved to the global configuration.
+
+```text
+/vault-tec-title My Terminal
+/vault-tec-subtitle Custom Interface
+```
+
+To reset them to the defaults:
+
+```text
+/vault-tec-title
+/vault-tec-subtitle
+```
+
+These commands update the global config file immediately (`~/.pi/agent/vault-tec.json`).
 
 ## Telemetry reference
 
@@ -94,7 +120,7 @@ The lower telemetry block is designed to remain compact while exposing the most 
 
 ## Command surface
 
-The package registers `/vault-tec`.
+The package registers `/vault-tec`, `/vault-tec-title`, and `/vault-tec-subtitle`.
 
 ### Interactive control panel
 
@@ -109,7 +135,7 @@ This opens a toggle list for the current session.
 ```text
 /vault-tec on
 /vault-tec off
-/vault-tec prompt off
+/vault-tec prompt on
 /vault-tec telemetry off
 /vault-tec theme on
 /vault-tec header off
@@ -118,6 +144,15 @@ This opens a toggle list for the current session.
 ```
 
 `reset` restores the current session to the merged disk-backed configuration.
+
+### Custom header text
+
+```text
+/vault-tec-title PI-BOY 3000
+/vault-tec-subtitle VAULT-TEC TERMINAL INTERFACE
+```
+
+These values are persisted to the global config automatically.
 
 ### Persist settings
 
@@ -148,11 +183,11 @@ The upstream OpenCode plugin has two major halves: prompt transformation and TUI
 
 | Upstream idea | pi implementation |
 |---|---|
-| server prompt injection | `before_agent_start` system-prompt append |
+| server prompt injection | `before_agent_start` system-prompt append (disabled by default) |
 | bundled theme | `themes/vault-tec.json` |
 | settings dialog | `/vault-tec` interactive settings list |
-| sidebar Pip-Boy panel | below-editor `PI-BOY 3000` telemetry widget |
-| terminal header | custom `setHeader()` with a text-only `PI-BOY 3000` banner |
+| sidebar Pip-Boy panel | below-editor telemetry widget |
+| terminal header | custom `setHeader()` with a minimal text banner |
 | lower console chrome | custom `setFooter()` used to suppress default footer clutter |
 
 ## Intentional differences
@@ -160,7 +195,7 @@ The upstream OpenCode plugin has two major halves: prompt transformation and TUI
 This package does not attempt a pixel-identical reproduction of the OpenCode plugin.
 
 - pi does not expose the same home-screen slot and post-processing APIs, therefore true scanlines, vignette, and sidebar slot injection are not replicated.
-- The prompt layer is append-only. It does not replace pi's base system prompt because pi's tool contracts and runtime constraints must remain intact.
+- The prompt layer is append-only and disabled by default. It does not replace pi's base system prompt because pi's tool contracts and runtime constraints must remain intact.
 - The current package favors a clean text terminal presentation over image-based or heavy decorative rendering.
 - The persona is intentionally lighter than the upstream prompt so that normal coding work remains readable.
 
