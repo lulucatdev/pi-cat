@@ -304,20 +304,15 @@ function buildHeaderLogo(
   title: string,
   subtitle: string,
 ): string[] {
+  const contentWidth = Math.max(visibleWidth(title), visibleWidth(subtitle));
+  const blockWidth = Math.min(width, Math.max(28, contentWidth + 8));
 
-  if (width < 36) {
-    return [
-      truncateToWidth(centerStyled(theme.fg("accent", title), width), width),
-      truncateToWidth(centerStyled(theme.fg("muted", subtitle), width), width),
-    ];
-  }
-
-  const top = theme.fg("accent", "═".repeat(width));
-  const titleLine = centerStyled(theme.fg("accent", title), width);
-  const subtitleLine = centerStyled(theme.fg("muted", subtitle), width);
-  const bottom = theme.fg("accent", "═".repeat(width));
-
-  return [top, titleLine, subtitleLine, bottom].map((line) => truncateToWidth(line, width));
+  return [
+    "",
+    truncateToWidth(centerStyled(centerStyled(theme.fg("accent", title), blockWidth), width), width),
+    truncateToWidth(centerStyled(centerStyled(theme.fg("muted", subtitle), blockWidth), width), width),
+    "",
+  ];
 }
 
 function getUsageSnapshot(ctx: ExtensionContext): {
