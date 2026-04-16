@@ -116,17 +116,20 @@ type ToggleKey =
   | "status"
   | "telemetry";
 
-type SettingsRecord = Record<ToggleKey, boolean>;
-
-interface VaultTecSettings extends SettingsRecord {}
+interface VaultTecSettings extends Record<ToggleKey, boolean> {
+  headerTitle: string;
+  headerSubtitle: string;
+}
 
 const DEFAULT_SETTINGS: VaultTecSettings = {
   enabled: true,
-  prompt: true,
+  prompt: false,
   autoTheme: true,
   header: true,
   status: true,
   telemetry: true,
+  headerTitle: "PI-BOY 3000",
+  headerSubtitle: "VAULT-TEC TERMINAL INTERFACE",
 };
 
 const SETTING_DEFS: Array<{ key: ToggleKey; label: string; description: string }> = [
@@ -190,6 +193,8 @@ function normalizeSettings(value: unknown, fallback: VaultTecSettings = DEFAULT_
     header: bool(object.header, fallback.header),
     status: bool(object.status, fallback.status),
     telemetry: bool(object.telemetry, fallback.telemetry),
+    headerTitle: typeof object.headerTitle === "string" ? object.headerTitle : fallback.headerTitle,
+    headerSubtitle: typeof object.headerSubtitle === "string" ? object.headerSubtitle : fallback.headerSubtitle,
   };
 }
 
@@ -296,9 +301,9 @@ function buildHeaderLogo(
   theme: ExtensionContext["ui"]["theme"],
   width: number,
   _rows: number,
+  title: string,
+  subtitle: string,
 ): string[] {
-  const title = "PI-BOY 3000";
-  const subtitle = "VAULT-TEC TERMINAL INTERFACE";
 
   if (width < 36) {
     return [
@@ -366,6 +371,8 @@ function buildTelemetryLines(
   theme: ExtensionContext["ui"]["theme"],
   branch: string | null,
   thinkingLevel: string,
+  width: number,
+  headerTitle: string,
 ): string[] {
   const usage = ctx.getContextUsage();
   const snapshot = getUsageSnapshot(ctx);
@@ -390,14 +397,17 @@ function buildTelemetryLines(
     theme.fg("text", formatTokens(snapshot.totalCacheRead));
 
   return [
-    theme.fg("accent", "PI-BOY 3000") + theme.fg("muted", ` | ${model}${modelLineSuffix}`),
-    theme.fg("warning", "CTX ") +
-      theme.fg("text", `[${progressBar(contextRatio)}] ${contextLabel}`) +
-      theme.fg("muted", " | ") +
-      trafficLabel +
-      theme.fg("muted", ` | ${contextTokens}/${contextWindow}`) +
-      autoCompactSuffix,
-    theme.fg("muted", workspaceLabel),
+    truncateToWidth(theme.fg("accent", headerTitle) + theme.fg("muted", ` | ${model}${modelLineSuffix}`), width),
+    truncateToWidth(
+      theme.fg("warning", "CTX ") +
+        theme.fg("text", `[${progressBar(contextRatio)}] ${contextLabel}`) +
+        theme.fg("muted", " | ") +
+        trafficLabel +
+        theme.fg("muted", ` | ${contextTokens}/${contextWindow}`) +
+        autoCompactSuffix,
+      width,
+    ),
+    truncateToWidth(theme.fg("muted", workspaceLabel), width),
   ];
 }
 
@@ -418,7 +428,7 @@ function applyHeader(ctx: ExtensionContext, settings: VaultTecSettings): void {
   ctx.ui.setHeader((tui, theme) => ({
     invalidate() {},
     render(width: number): string[] {
-      return buildHeaderLogo(theme, width, tui.terminal.rows);
+      return buildHeaderLogo(theme, width, tui.terminal.rows, settings.headerTitle, settings.headerSubtitle);
     },
   }));
 }
@@ -436,9 +446,9 @@ function applyWidgets(
       "vault-tec-telemetry",
       (_tui, theme) => ({
         invalidate() {},
-        render(_width: number): string[] {
+        render(width: number): string[] {
           const thinkingLevel = getThinkingLevel();
-          return buildTelemetryLines(ctx, theme, branch, thinkingLevel);
+          return buildTelemetryLines(ctx, theme, branch, thinkingLevel, width, settings.headerTitle);
         },
       }),
       { placement: "belowEditor" },
@@ -676,6 +686,24 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         return;
       }
 
+      if (command === "header-title") {
+        const value = args.trim().slice(command.length).trim() || "PI-BOY 3000";
+        settings = { ...settings, headerTitle: value };
+        persistSessionSettings();
+        refreshUi(ctx);
+        ctx.ui.notify(`Header title set to: ${value}`, "info");
+        return;
+      }
+
+      if (command === "header-subtitle") {
+        const value = args.trim().slice(command.length).trim() || "VAULT-TEC TERMINAL INTERFACE";
+        settings = { ...settings, headerSubtitle: value };
+        persistSessionSettings();
+        refreshUi(ctx);
+        ctx.ui.notify(`Header subtitle set to: ${value}`, "info");
+        return;
+      }
+
       if (field) {
         const explicitValue = second === "on" ? true : second === "off" ? false : !settings[field];
         updateSetting(ctx, field, explicitValue);
@@ -683,7 +711,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         return;
       }
 
-      ctx.ui.notify("Unknown /vault-tec command. Use on, off, reset, status, save, or a field name.", "warning");
+      ctx.ui.notify("Unknown /vault-tec command. Use on, off, reset, status, save, header-title, header-subtitle, or a field name.", "warning");
     },
   });
 
