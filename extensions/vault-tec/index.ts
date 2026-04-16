@@ -683,6 +683,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         const value = args.trim().slice(command.length).trim() || "PI-BOY 3000";
         settings = { ...settings, headerTitle: value };
         persistSessionSettings();
+        await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
         refreshUi(ctx);
         ctx.ui.notify(`Header title set to: ${value}`, "info");
         return;
@@ -692,6 +693,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         const value = args.trim().slice(command.length).trim() || "VAULT-TEC TERMINAL INTERFACE";
         settings = { ...settings, headerSubtitle: value };
         persistSessionSettings();
+        await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
         refreshUi(ctx);
         ctx.ui.notify(`Header subtitle set to: ${value}`, "info");
         return;
@@ -714,6 +716,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
       const value = args.trim() || "PI-BOY 3000";
       settings = { ...settings, headerTitle: value };
       persistSessionSettings();
+      await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
       refreshUi(ctx);
       ctx.ui.notify(`Header title set to: ${value}`, "info");
     },
@@ -725,6 +728,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
       const value = args.trim() || "VAULT-TEC TERMINAL INTERFACE";
       settings = { ...settings, headerSubtitle: value };
       persistSessionSettings();
+      await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
       refreshUi(ctx);
       ctx.ui.notify(`Header subtitle set to: ${value}`, "info");
     },
