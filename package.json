@@ -1,13 +1,13 @@
 {
-  "name": "pi-vault-tec",
+  "name": "pi-cat",
   "version": "0.2.0",
-  "description": "Vault-Tec themed pi package for pi with a customizable header, prompt injection, theme, and below-editor telemetry.",
+  "description": "Cat-themed pi package with a phosphor-green palette, customizable header text, and compact telemetry.",
   "license": "MIT",
   "type": "module",
   "keywords": [
     "pi-package",
     "pi",
-    "vault-tec",
+    "cat",
     "theme",
     "terminal",
     "persona"
@@ -32,9 +32,13 @@
     "@types/node": "^25.5.0",
     "typescript": "^5.9.3"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lulucatdev/pi-cat.git"
+  },
   "pi": {
     "extensions": [
-      "./extensions/vault-tec/index.ts"
+      "./extensions/cat/index.ts"
     ],
     "themes": [
       "./themes"

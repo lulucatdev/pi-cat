@@ -1,8 +1,8 @@
-# pi-vault-tec
+# pi-cat
 
-`pi-vault-tec` is a pi package that applies a restrained Vault-Tec presentation layer to the interactive terminal. It combines a bundled phosphor-green theme, a text-only header, and a telemetry block rendered below the editor.
+`pi-cat` is a cat-themed package for pi. It keeps the phosphor-green terminal palette, adds a light optional cat prompt layer, renders a compact telemetry block, and defaults the header title to `(。-ω-)` with the subtitle `Your Cat Agent`.
 
-The package is inspired by [`kommander/oc-plugin-vault-tec`](https://github.com/kommander/oc-plugin-vault-tec), but it is implemented directly against pi's extension and theme APIs rather than as a line-for-line port.
+The package is designed to feel tidy, quiet, and slightly playful without interfering with normal coding work.
 
 ## Preview
 
@@ -10,36 +10,37 @@ A typical header looks like this:
 
 ```text
 
-         PI-BOY 3000
-  VAULT-TEC TERMINAL INTERFACE
+           (。-ω-)
+       Your Cat Agent
 
 ```
 
 A typical lower telemetry block looks like this:
 
 ```text
-PI-BOY 3000 | openai-codex/gpt-5.4 | high
-CTX [=.............] 7% | ↑19K ↓67 R0 | 19K/272K | AUTO
-~/Developer/pi-vault-tec (main)
+(。-ω-) | openai-codex/gpt-5.4 | high
+CTX 55% 150K/272K | ↑339K ↓51K R9.6M |  AUTO
+~/Developer/pi-cat (main)
 ```
 
-The exact spacing depends on terminal width, active model, and current session state.
+The exact spacing depends on terminal width, active model, and session state.
 
 ## Features
 
-- Bundled `vault-tec` theme with a phosphor-green terminal palette.
-- Minimal, text-only header banner with customizable title and subtitle.
-- Below-editor telemetry that shows model, provider, thinking level, context usage, cumulative token traffic, and workspace path.
-- Footer override that suppresses the default lower-footer clutter from pi and other extensions.
-- Session-scoped toggles plus disk-backed global or project settings.
-- Safe width handling: all lines are truncated to the terminal width to prevent crashes on narrow terminals.
+- Bundled `cat` theme with a phosphor-green palette.
+- Optional append-only cat prompt layer that preserves pi's base system prompt.
+- Minimal text header with configurable title and subtitle.
+- Below-editor telemetry showing model, provider, thinking level, context usage, token traffic, and workspace path.
+- Footer override that removes default lower-footer clutter.
+- Session-scoped toggles with disk-backed global or project settings.
+- Safe width handling so header and telemetry lines do not overflow narrow terminals.
 
 ## Installation
 
 Install directly from GitHub:
 
 ```bash
-pi install https://github.com/lulucatdev/pi-vault-tec
+pi install https://github.com/lulucatdev/pi-cat
 ```
 
 Then reload pi:
@@ -51,14 +52,14 @@ Then reload pi:
 For local development from this working copy:
 
 ```bash
-pi install /Users/lucas/Developer/pi-vault-tec
+pi install /Users/lucas/Developer/pi-cat
 ```
 
 For a one-off run without installation:
 
 ```bash
-pi -e /Users/lucas/Developer/pi-vault-tec/extensions/vault-tec/index.ts \
-  --theme /Users/lucas/Developer/pi-vault-tec/themes/vault-tec.json
+pi -e /Users/lucas/Developer/pi-cat/extensions/cat/index.ts \
+  --theme /Users/lucas/Developer/pi-cat/themes/cat.json
 ```
 
 ## Update and removal
@@ -66,66 +67,76 @@ pi -e /Users/lucas/Developer/pi-vault-tec/extensions/vault-tec/index.ts \
 Update the installed GitHub package:
 
 ```bash
-pi update https://github.com/lulucatdev/pi-vault-tec
+pi update https://github.com/lulucatdev/pi-cat
 ```
 
 Uninstall it:
 
 ```bash
-pi uninstall https://github.com/lulucatdev/pi-vault-tec
+pi uninstall https://github.com/lulucatdev/pi-cat
 ```
 
 ## What it enables
 
 After installation, the package can automatically:
 
-- switch pi to the bundled `vault-tec` theme;
-- replace the default header with a minimal, centered text banner;
+- switch pi to the bundled `cat` theme;
+- replace the default header with a centered cat banner;
+- optionally append a light cat terminal persona to the system prompt;
 - show a telemetry panel below the editor with provider, model, thinking level, context usage, token counters, and workspace path;
 - suppress the default lower-footer clutter with a custom footer override.
 
-All of these features are individually toggleable. By default, the package does **not** modify the model's system prompt; it only affects the terminal UI.
+All of these features are individually toggleable. By default, the prompt layer is off, so the package changes the terminal presentation without changing the model persona unless you enable it.
 
 ## Custom header text
 
-You can customize the header title and subtitle. Changes are automatically saved to the global configuration.
+You can customize the header title and subtitle. Changes are saved to the global configuration immediately.
 
 ```text
-/vault-tec-title My Terminal
-/vault-tec-subtitle Custom Interface
+/cat-title My Terminal
+/cat-subtitle Sleeping Supervisor
 ```
 
-To reset them to the defaults:
+You can also set them through the main command surface:
 
 ```text
-/vault-tec-title
-/vault-tec-subtitle
+/cat header-title My Terminal
+/cat header-subtitle Sleeping Supervisor
 ```
 
-These commands update the global config file immediately (`~/.pi/agent/vault-tec.json`).
+To reset them to the defaults, run the commands without a value:
+
+```text
+/cat-title
+/cat-subtitle
+```
+
+Defaults:
+
+- title: `(。-ω-)`
+- subtitle: `Your Cat Agent`
 
 ## Telemetry reference
 
-The lower telemetry block is designed to remain compact while exposing the most useful runtime information.
+The lower telemetry block is designed to stay compact while exposing the most useful runtime information.
 
 - `provider/model` is the active pi model identifier, for example `openai-codex/gpt-5.4`.
 - The last field on the first line is the current thinking level, such as `off`, `high`, or `xhigh`.
-- `CTX` is the estimated context usage bar and percentage for the active model.
+- `CTX` is the estimated context percentage followed by current tokens over context window.
 - `↑` is the cumulative input-token count from assistant turns in the current session history.
 - `↓` is the cumulative output-token count from assistant turns in the current session history.
 - `R` is the cumulative cache-read token count.
-- `19K/272K` means estimated current context tokens over the model context window.
 - `AUTO` appears when pi auto-compaction is currently enabled.
 - The final line shows the current workspace path and Git branch, if available.
 
 ## Command surface
 
-The package registers `/vault-tec`, `/vault-tec-title`, and `/vault-tec-subtitle`.
+The package registers `/cat`, `/cat-title`, and `/cat-subtitle`.
 
 ### Interactive control panel
 
 ```text
-/vault-tec
+/cat
 ```
 
 This opens a toggle list for the current session.
@@ -133,38 +144,29 @@ This opens a toggle list for the current session.
 ### Direct toggles
 
 ```text
-/vault-tec on
-/vault-tec off
-/vault-tec prompt on
-/vault-tec telemetry off
-/vault-tec theme on
-/vault-tec header off
-/vault-tec status
-/vault-tec reset
+/cat on
+/cat off
+/cat prompt on
+/cat telemetry off
+/cat theme on
+/cat header off
+/cat status
+/cat reset
 ```
 
 `reset` restores the current session to the merged disk-backed configuration.
 
-### Custom header text
-
-```text
-/vault-tec-title PI-BOY 3000
-/vault-tec-subtitle VAULT-TEC TERMINAL INTERFACE
-```
-
-These values are persisted to the global config automatically.
-
 ### Persist settings
 
 ```text
-/vault-tec save global
-/vault-tec save project
+/cat save global
+/cat save project
 ```
 
 Persistence is stored in these files:
 
-- global: `~/.pi/agent/vault-tec.json`
-- project: `.pi/vault-tec.json`
+- global: `~/.pi/agent/pi-cat.json`
+- project: `.pi/pi-cat.json`
 
 Project settings override global settings.
 
@@ -173,39 +175,17 @@ Project settings override global settings.
 After installation, a typical setup flow is:
 
 1. Run `/reload`.
-2. Run `/vault-tec` to open the session control panel.
+2. Run `/cat` to open the session control panel.
 3. Confirm that `theme`, `header`, `telemetry`, and `status` are enabled.
-4. If desired, persist the current configuration with `/vault-tec save global`.
-
-## Feature mapping from the upstream plugin
-
-The upstream OpenCode plugin has two major halves: prompt transformation and TUI slot customization. The pi port maps those capabilities as follows.
-
-| Upstream idea | pi implementation |
-|---|---|
-| server prompt injection | `before_agent_start` system-prompt append (disabled by default) |
-| bundled theme | `themes/vault-tec.json` |
-| settings dialog | `/vault-tec` interactive settings list |
-| sidebar Pip-Boy panel | below-editor telemetry widget |
-| terminal header | custom `setHeader()` with a minimal text banner |
-| lower console chrome | custom `setFooter()` used to suppress default footer clutter |
-
-## Intentional differences
-
-This package does not attempt a pixel-identical reproduction of the OpenCode plugin.
-
-- pi does not expose the same home-screen slot and post-processing APIs, therefore true scanlines, vignette, and sidebar slot injection are not replicated.
-- The prompt layer is append-only and disabled by default. It does not replace pi's base system prompt because pi's tool contracts and runtime constraints must remain intact.
-- The current package favors a clean text terminal presentation over image-based or heavy decorative rendering.
-- The persona is intentionally lighter than the upstream prompt so that normal coding work remains readable.
+4. If desired, persist the current configuration with `/cat save global`.
 
 ## Files
 
 ```text
-pi-vault-tec/
-├── extensions/vault-tec/index.ts
-├── extensions/vault-tec/prompt.txt
-├── themes/vault-tec.json
+pi-cat/
+├── extensions/cat/index.ts
+├── extensions/cat/prompt.txt
+├── themes/cat.json
 ├── package.json
 └── README.md
 ```

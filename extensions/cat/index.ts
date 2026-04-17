@@ -20,12 +20,12 @@ import {
   visibleWidth,
 } from "@mariozechner/pi-tui";
 
-const THEME_NAME = "vault-tec";
-const SETTINGS_ENTRY_TYPE = "vault-tec-settings";
-const PROJECT_CONFIG_RELATIVE_PATH = ".pi/vault-tec.json";
-const GLOBAL_CONFIG_PATH = join(getAgentDir(), "vault-tec.json");
+const THEME_NAME = "cat";
+const SETTINGS_ENTRY_TYPE = "pi-cat-settings";
+const PROJECT_CONFIG_RELATIVE_PATH = ".pi/pi-cat.json";
+const GLOBAL_CONFIG_PATH = join(getAgentDir(), "pi-cat.json");
 const PROMPT_TEXT = readFileSync(new URL("./prompt.txt", import.meta.url), "utf8").trim();
-const PROMPT_MARKER = "VAULT-TEC TERMINAL ACTIVE";
+const PROMPT_MARKER = "CAT TERMINAL ACTIVE";
 
 const HEADER_HOME = [
   "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡶⠶⠶⢶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
@@ -116,47 +116,47 @@ type ToggleKey =
   | "status"
   | "telemetry";
 
-interface VaultTecSettings extends Record<ToggleKey, boolean> {
+interface CatSettings extends Record<ToggleKey, boolean> {
   headerTitle: string;
   headerSubtitle: string;
 }
 
-const DEFAULT_SETTINGS: VaultTecSettings = {
+const DEFAULT_SETTINGS: CatSettings = {
   enabled: true,
   prompt: false,
   autoTheme: true,
   header: true,
   status: true,
   telemetry: true,
-  headerTitle: "PI-BOY 3000",
-  headerSubtitle: "VAULT-TEC TERMINAL INTERFACE",
+  headerTitle: "(。-ω-)",
+  headerSubtitle: "Your Cat Agent",
 };
 
 const SETTING_DEFS: Array<{ key: ToggleKey; label: string; description: string }> = [
   {
     key: "enabled",
-    label: "Vault-Tec mode",
-    description: "Master switch for prompt and UI treatment.",
+    label: "Cat mode",
+    description: "Master switch for the cat prompt and interface treatment.",
   },
   {
     key: "prompt",
     label: "Prompt layer",
-    description: "Append the Vault-Tec terminal voice before each run.",
+    description: "Append the cat terminal voice before each run.",
   },
   {
     key: "autoTheme",
     label: "Auto theme",
-    description: "Switch pi to the bundled vault-tec theme.",
+    description: "Switch pi to the bundled cat theme.",
   },
   {
     key: "header",
-    label: "Vault-Tec crest",
-    description: "Replace the default header with the exact upstream Vault-Tec home logo.",
+    label: "Cat header",
+    description: "Replace the default header with the bundled cat terminal header.",
   },
   {
     key: "status",
     label: "Footer console",
-    description: "Replace the default footer with the Vault-Tec console.",
+    description: "Replace the default footer with the cat console.",
   },
   {
     key: "telemetry",
@@ -184,7 +184,7 @@ function bool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
-function normalizeSettings(value: unknown, fallback: VaultTecSettings = DEFAULT_SETTINGS): VaultTecSettings {
+function normalizeSettings(value: unknown, fallback: CatSettings = DEFAULT_SETTINGS): CatSettings {
   const object = isObject(value) ? value : {};
   return {
     enabled: bool(object.enabled, fallback.enabled),
@@ -210,19 +210,19 @@ async function readSettingsFile(path: string): Promise<Record<string, unknown> |
   }
 }
 
-async function writeSettingsFile(path: string, settings: VaultTecSettings): Promise<void> {
+async function writeSettingsFile(path: string, settings: CatSettings): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
 }
 
-async function loadDiskSettings(cwd: string): Promise<VaultTecSettings> {
+async function loadDiskSettings(cwd: string): Promise<CatSettings> {
   const globalSettings = normalizeSettings(await readSettingsFile(GLOBAL_CONFIG_PATH), DEFAULT_SETTINGS);
   const projectPath = join(cwd, PROJECT_CONFIG_RELATIVE_PATH);
   return normalizeSettings(await readSettingsFile(projectPath), globalSettings);
 }
 
-function getSessionSettings(ctx: ExtensionContext, fallback: VaultTecSettings): VaultTecSettings | undefined {
-  let restored: VaultTecSettings | undefined;
+function getSessionSettings(ctx: ExtensionContext, fallback: CatSettings): CatSettings | undefined {
+  let restored: CatSettings | undefined;
 
   for (const entry of ctx.sessionManager.getBranch()) {
     if (entry.type !== "custom") continue;
@@ -404,7 +404,7 @@ function withHomeTilde(path: string): string {
   return `~${path.slice(home.length)}`;
 }
 
-function applyHeader(ctx: ExtensionContext, settings: VaultTecSettings): void {
+function applyHeader(ctx: ExtensionContext, settings: CatSettings): void {
   if (!ctx.hasUI) return;
 
   if (!settings.enabled || !settings.header) {
@@ -422,7 +422,7 @@ function applyHeader(ctx: ExtensionContext, settings: VaultTecSettings): void {
 
 function applyWidgets(
   ctx: ExtensionContext,
-  settings: VaultTecSettings,
+  settings: CatSettings,
   branch: string | null,
   getThinkingLevel: () => string,
 ): void {
@@ -430,7 +430,7 @@ function applyWidgets(
 
   if (settings.enabled && settings.telemetry) {
     ctx.ui.setWidget(
-      "vault-tec-telemetry",
+      "cat-telemetry",
       (_tui, theme) => ({
         invalidate() {},
         render(width: number): string[] {
@@ -441,19 +441,19 @@ function applyWidgets(
       { placement: "belowEditor" },
     );
   } else {
-    ctx.ui.setWidget("vault-tec-telemetry", undefined);
+    ctx.ui.setWidget("cat-telemetry", undefined);
   }
 }
 
 function applyFooter(
   ctx: ExtensionContext,
-  settings: VaultTecSettings,
+  settings: CatSettings,
   onBranchChange: (branch: string | null) => void,
 ): void {
   if (!ctx.hasUI) return;
 
   // Clear the legacy per-extension status entry so it never reappears in the custom footer.
-  ctx.ui.setStatus("vault-tec", undefined);
+  ctx.ui.setStatus("cat", undefined);
 
   if (!settings.enabled || !settings.status) {
     onBranchChange(null);
@@ -488,7 +488,7 @@ function applyFooter(
 
 function applyTheme(
   ctx: ExtensionContext,
-  settings: VaultTecSettings,
+  settings: CatSettings,
   previousThemeName: string | undefined,
 ): { previousThemeName: string | undefined; warned: boolean } {
   if (!ctx.hasUI) return { previousThemeName, warned: false };
@@ -508,21 +508,21 @@ function applyTheme(
   return { previousThemeName: undefined, warned: false };
 }
 
-function renderStatusSummary(settings: VaultTecSettings): string {
+function renderStatusSummary(settings: CatSettings): string {
   const parts = SETTING_DEFS.map((item) => `${item.key}=${settings[item.key] ? "on" : "off"}`);
-  return `Vault-Tec ${settings.enabled ? "enabled" : "disabled"} | ${parts.join(" | ")}`;
+  return `Cat mode ${settings.enabled ? "enabled" : "disabled"} | ${parts.join(" | ")}`;
 }
 
 async function openSettingsDialog(
   ctx: ExtensionCommandContext,
-  settings: VaultTecSettings,
+  settings: CatSettings,
   onToggle: (key: ToggleKey, value: boolean) => void,
 ): Promise<void> {
   if (!ctx.hasUI) return;
 
   await ctx.ui.custom<void>((tui, theme, _keybindings, done) => {
     const container = new Container();
-    container.addChild(new Text(theme.fg("accent", theme.bold("Vault-Tec control panel")), 1, 0));
+    container.addChild(new Text(theme.fg("accent", theme.bold("Cat control panel")), 1, 0));
     container.addChild(new Spacer(1));
 
     const items: SettingItem[] = SETTING_DEFS.map((item) => ({
@@ -550,7 +550,7 @@ async function openSettingsDialog(
     container.addChild(settingsList);
     container.addChild(new Spacer(1));
     container.addChild(
-      new Text(theme.fg("dim", "Enter or Space toggles. Use /vault-tec save global to persist."), 1, 0),
+      new Text(theme.fg("dim", "Enter or Space toggles. Use /cat save global to persist."), 1, 0),
     );
 
     return {
@@ -572,7 +572,7 @@ function getConfigPath(cwd: string, scope: Scope): string {
   return scope === "global" ? GLOBAL_CONFIG_PATH : join(cwd, PROJECT_CONFIG_RELATIVE_PATH);
 }
 
-export default function vaultTecExtension(pi: ExtensionAPI): void {
+export default function catExtension(pi: ExtensionAPI): void {
   let settings = { ...DEFAULT_SETTINGS };
   let turnCount = 0;
   let busy = false;
@@ -597,7 +597,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
     previousThemeName = themeResult.previousThemeName;
     if (themeResult.warned && !themeWarningShown) {
       themeWarningShown = true;
-      ctx.ui.notify("vault-tec theme could not be applied. Confirm that the package theme resources are loaded.", "warning");
+      ctx.ui.notify("cat theme could not be applied. Confirm that the package theme resources are loaded.", "warning");
     }
 
     applyHeader(ctx, settings);
@@ -620,8 +620,8 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
     settings = getSessionSettings(ctx, diskSettings) ?? diskSettings;
   };
 
-  pi.registerCommand("vault-tec", {
-    description: "Configure the Vault-Tec theme, prompt, and telemetry.",
+  pi.registerCommand("cat", {
+    description: "Configure the cat theme, prompt, and telemetry.",
     handler: async (args, ctx) => {
       const tokens = args
         .trim()
@@ -639,13 +639,13 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
 
       if (command === "on") {
         updateSetting(ctx, "enabled", true);
-        ctx.ui.notify("Vault-Tec mode enabled for this session.", "info");
+        ctx.ui.notify("Cat mode enabled for this session.", "info");
         return;
       }
 
       if (command === "off") {
         updateSetting(ctx, "enabled", false);
-        ctx.ui.notify("Vault-Tec mode disabled for this session.", "info");
+        ctx.ui.notify("Cat mode disabled for this session.", "info");
         return;
       }
 
@@ -653,7 +653,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         settings = await loadDiskSettings(ctx.cwd);
         persistSessionSettings();
         refreshUi(ctx);
-        ctx.ui.notify("Vault-Tec session state reset to saved configuration.", "info");
+        ctx.ui.notify("Cat session state reset to saved configuration.", "info");
         return;
       }
 
@@ -664,17 +664,17 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
 
       if (command === "save") {
         if (second !== "global" && second !== "project") {
-          ctx.ui.notify("Use /vault-tec save global or /vault-tec save project.", "warning");
+          ctx.ui.notify("Use /cat save global or /cat save project.", "warning");
           return;
         }
 
         await writeSettingsFile(getConfigPath(ctx.cwd, second), settings);
-        ctx.ui.notify(`Vault-Tec settings saved to ${second} scope.`, "info");
+        ctx.ui.notify(`Cat settings saved to ${second} scope.`, "info");
         return;
       }
 
       if (command === "header-title") {
-        const value = args.trim().slice(command.length).trim() || "PI-BOY 3000";
+        const value = args.trim().slice(command.length).trim() || "(。-ω-)";
         settings = { ...settings, headerTitle: value };
         persistSessionSettings();
         await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
@@ -684,7 +684,7 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
       }
 
       if (command === "header-subtitle") {
-        const value = args.trim().slice(command.length).trim() || "VAULT-TEC TERMINAL INTERFACE";
+        const value = args.trim().slice(command.length).trim() || "Your Cat Agent";
         settings = { ...settings, headerSubtitle: value };
         persistSessionSettings();
         await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
@@ -700,14 +700,14 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
         return;
       }
 
-      ctx.ui.notify("Unknown /vault-tec command. Use on, off, reset, status, save, header-title, header-subtitle, or a field name.", "warning");
+      ctx.ui.notify("Unknown /cat command. Use on, off, reset, status, save, header-title, header-subtitle, or a field name.", "warning");
     },
   });
 
-  pi.registerCommand("vault-tec-title", {
-    description: "Set the Vault-Tec header title (e.g., /vault-tec-title My Title).",
+  pi.registerCommand("cat-title", {
+    description: "Set the cat header title (e.g., /cat-title My Title).",
     handler: async (args, ctx) => {
-      const value = args.trim() || "PI-BOY 3000";
+      const value = args.trim() || "(。-ω-)";
       settings = { ...settings, headerTitle: value };
       persistSessionSettings();
       await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
@@ -716,10 +716,10 @@ export default function vaultTecExtension(pi: ExtensionAPI): void {
     },
   });
 
-  pi.registerCommand("vault-tec-subtitle", {
-    description: "Set the Vault-Tec header subtitle (e.g., /vault-tec-subtitle My Subtitle).",
+  pi.registerCommand("cat-subtitle", {
+    description: "Set the cat header subtitle (e.g., /cat-subtitle My Subtitle).",
     handler: async (args, ctx) => {
-      const value = args.trim() || "VAULT-TEC TERMINAL INTERFACE";
+      const value = args.trim() || "Your Cat Agent";
       settings = { ...settings, headerSubtitle: value };
       persistSessionSettings();
       await writeSettingsFile(GLOBAL_CONFIG_PATH, settings);
