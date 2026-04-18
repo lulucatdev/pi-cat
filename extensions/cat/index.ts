@@ -250,12 +250,12 @@ function getContextRatio(usage: ReturnType<ExtensionContext["getContextUsage"]>)
   if (!usage) return null;
 
   if (typeof usage.tokens === "number" && usage.contextWindow > 0) {
-    return Math.max(0, Math.min(1, usage.tokens / usage.contextWindow));
+    return Math.max(0, usage.tokens / usage.contextWindow);
   }
 
   if (typeof usage.percent === "number") {
     const normalized = usage.percent > 1 ? usage.percent / 100 : usage.percent;
-    return Math.max(0, Math.min(1, normalized));
+    return Math.max(0, normalized);
   }
 
   return null;
@@ -263,8 +263,8 @@ function getContextRatio(usage: ReturnType<ExtensionContext["getContextUsage"]>)
 
 function progressBar(percent: number | null, width = 14): string {
   if (percent === null) return `${".".repeat(width)}`;
-  const ratio = Math.max(0, Math.min(1, percent));
-  const filled = Math.round(ratio * width);
+  const ratio = Math.max(0, percent);
+  const filled = Math.min(width, Math.round(ratio * width));
   return `${"=".repeat(filled)}${".".repeat(Math.max(0, width - filled))}`;
 }
 
